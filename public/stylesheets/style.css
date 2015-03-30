@@ -1,0 +1,16 @@
+body { padding-top: 70px; }
+
+/*Locations Show*/
+.review { padding-bottom: 5px; }
+.panel-body.review-container { padding-top:0; }
+.review-header { margin-bottom: 10px; }
+.reviewAuthor { margin: 0; }
+.reviewTimestamp {
+	color: #ccc;
+	margin-left: 5px;
+}
+.review {
+	padding: 15px;
+	margin-bottom: 15px;
+	border-bottom: solid 1px #ddd;
+} 

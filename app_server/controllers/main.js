@@ -1,10 +1,12 @@
-var express = require('express');
-var router = express.Router();
+module.exports.index = function(request, response){
+	response.writeHead(302, {'Location': '/location'});
+	response.end();
+}
 
-/* GET home page. */
-router
-  .get('/', function(req, res, next) {
-    res.render('index', { title: 'Yussi' });
-  });
+module.exports.about = function(request, response){
+	response.render('generic-text', {'title': 'About Us'});
+}
 
-module.exports = router;
+module.exports.signin = function(request, response){
+	response.render('signin-index', {'title': 'Sign in Loc8r'});
+}
