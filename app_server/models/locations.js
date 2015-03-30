@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 
-var openingTimeSchema = new.mongoose.Schema({
+var openingTimeSchema = new mongoose.Schema({
 	days: {type:String, require:true},
 	opening: String,
 	closing: String,
@@ -27,4 +27,4 @@ var locationSchema = new mongoose.Schema({
 	reviews:[reviewSchema]
 });
 
-mongoose.model('Location', locationSchema):
+mongoose.model('Location', locationSchema);
