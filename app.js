@@ -6,7 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var app = express();
-require('./app_server/models/db.js');
+require('./app_api/models/db.js');
 
 // view engine setup
 app.set('views', path.join(__dirname, '/app_server/views'));
@@ -24,7 +24,8 @@ app.use(express.static('public'));
 
 
 //Use the Routes
-require('./routes')(app);
+require('./app_server/routes')(app);
+require('./app_api/routes')(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
