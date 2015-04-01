@@ -86,8 +86,6 @@ var doSetAverangeRating = function(location){
 
 // /locations
 module.exports.locationsCreate = function(request, response){
-
-	console.log(request.body);
 	
 	Loc.create({
 		name: request.body.name,
@@ -180,11 +178,88 @@ module.exports.locationReadOne = function(request, response){
 }
 
 module.exports.locationUpdateOne = function(request, response){
-	sendJsonResponse(response, 200, {'status':'success'});
+
+	if(!request.params.locationid) {
+		sendJsonResponse(response, 404, {'message':'Not found, locationid is required'});
+		return;
+	}
+
+	Loc
+		.findById(request.params.locationid)
+		.select('-reviews -rating')
+		.exec(function(err, location){
+			if(!location) {
+				sendJsonResponse(response, 404, {'message':'locationid not found'});
+				return;
+			} else if(err) {
+				sendJsonResponse(response, 404, err);
+				return;
+			}
+
+			location.name = request.body.name;
+			location.address = request.body.address;
+			location.facilities = request.body.facilities.split(",");
+			location.coords = [parseFloat(request.body.lng), parseFloat(request.body.lat)];
+			location.openingTimes = [
+				{
+					days : request.body.days1,
+					opening : request.body.opening1,
+					closing : request.body.closing1,
+					closed : request.body.closed1,
+				},
+				{
+					days : request.body.days2,
+					opening : request.body.opening2,
+					closing : request.body.closing2,
+					closed : request.body.closed2,
+				}
+			];
+
+			location.save(function(err, location){
+				if(err) {
+					sendJsonResponse(response, 404, err);
+				} else {
+					sendJsonResponse(response, 200, location);
+				}
+			});
+
+
+		});
+
+
+
 }
 
 module.exports.locationDeleteOne = function(request, response){
-	sendJsonResponse(response, 200, {'status':'success'});
+	
+	if(!request.params.locationid) {
+		sendJsonResponse(response, 404, {'message':'No locationid'});
+		return;
+	}
+
+	Loc
+		.findByIdAndRemove(request.params.locationid)
+		.exec(function(err, location){
+			if(err) {
+				sendJsonResponse(response, 404, err);
+				return;
+			}
+
+			sendJsonResponse(response, 204, null);
+			
+		});
+
+
+	//Alternative way to do it, adding extra step into the code before deleting
+	/*Loc
+		.findById(request.params.locationid)
+		.exec(function(err, location) {
+			// Do something here
+			location.remove(function(err, location){
+				// Confirm success or failure
+			});
+		});
+		*/
 }
 
 
@@ -256,11 +331,93 @@ module.exports.reviewsReadOne = function(request, response){
 }
 
 module.exports.reviewsUpdateOne = function(request, response){
-	response.status(200).json({'status':'success'});
+	
+	if(!request.params.locationid || !request.params.reviewid) {
+		sendJsonResponse(response, 404, {'message':'Not found, locationid and reviewid are both required'});
+		return;
+	}
+
+	Loc
+		.findById(request.params.locationid)
+		.select('reviews')
+		.exec(function(err, location){
+			if(!location) {
+				sendJsonResponse(response, 404, {'message':'locationid not found'});
+				return;
+			} else if(err) {
+				sendJsonResponse(response, 404, err);
+				return;
+			}
+
+			if(location.reviews && location.reviews.length > 0) {
+				var review = location.reviews.id(request.params.reviewid);
+
+				if(!review) {
+					sendJsonResponse(response, 404, {'message':'reviewid not found'});
+				} else {
+					review.author = request.body.author;
+					review.rating = request.body.rating;
+					review.reviewText = request.body.reviewText;
+
+					location.save(function(err, location){
+						if(err) {
+							sendJsonResponse(response, 404, err);
+						} else {
+							updateAverangeRating(location._id);
+							sendJsonResponse(response, 200, review);
+						}
+					});
+				}
+
+			} else {
+				sendJsonResponse(response, 404, {'message':'No review to update'});
+			}
+		});
+
+
 }
 
 module.exports.reviewsDeleteOne = function(request, response){
-	response.status(200).json({'status':'success'});
+	
+	if(!request.params.locationid || !request.params.reviewid) {
+		sendJsonResponse(response, 404, {'message':'Not found, locationid and reviewid are both required'});
+		return;
+	}
+
+	Loc
+		.findById(request.params.locationid)
+		.select('reviews')
+		.exec(function(err, location){
+			if(!location) {
+				sendJsonResponse(response, 404, {'message':'locationid not found'});
+				return;
+			} else if(err) {
+				sendJsonResponse(response, 404, err);
+				return;
+			}
+
+			if(location.reviews && location.reviews.length > 0) {
+				if(!location.reviews.id(request.params.reviewid)) {
+					sendJsonResponse(response, 404, {'message':'reviewid not found'});
+					return;
+				} else {
+					location.reviews.id(request.params.reviewid).remove();
+
+					location.save(function(err){
+						if(err) {
+							sendJsonResponse(response, 404, err);
+						} else {
+							updateAverangeRating(location._id);
+							sendJsonResponse(response, 204, null);
+						}
+					});
+
+				}
+			} else {
+				sendJsonResponse(response, 404, {'message':'No review deleted'});
+			}
+		});
+
 }
 
 
