@@ -1,85 +1,64 @@
+include _includes/sharedHTMLFunctions
 extends layout
 
 block content
 	.row.page-header
 		.col-lg-12
-			h1 Starcups
+			h1= pageHeader.title
 	.row
 		.col-xs-12.col-md-9
 			.row
 				.col-xs-12.col-sm-6
 					p.rating
-						span.glyphicon.glyphicon-star
-						span.glyphicon.glyphicon-star
-						span.glyphicon.glyphicon-star
-						span.glyphicon.glyphicon-star-empty
-						span.glyphicon.glyphicon-star-empty
-					p 125 High Street, Reading, RG6 1PS
+						+outputRating(location.rating)
+					p= location.address
 					
 					.panel.panel-primary
 						.panel-heading
 							h2.panel-title Opening hours
 
 						.panel-body
-							p Monday - Friday : 7:00am - 7:00pm
-							p Saturday : 8:00am - 5:00pm
-							p Sunday  :closed
+							each openingTime in location.openingTimes
+								p= openingTime.days + ': ' + openingTime.opening +' - '+ openingTime.closing
 
 					.panel.panel-primary
 						.panel-heading
 							h2.panel-title Facilities
 
 						.panel-body
-							span.label.label-warning
-								span.glyphicon.glyphicon-ok
-									&nbsp; Hot drinks
-							&nbsp;
-							span.label.label-warning
-								span.glyphicon.glyphicon-ok
-									&nbsp; Food
-							&nbsp;
-							span.label.label-warning
-								span.glyphicon.glyphicon-ok
-									&nbsp; Premium wifi
+
+							each facilitie in location.facilities
+								span.label.label-warning
+									span.glyphicon.glyphicon-ok
+										&nbsp;
+										span= facilitie
+								&nbsp;
 
 				.col-xs-12.col-sm-6.location-map
 					.panel.panel-primary
 						.panel-heading
 							h2.panel-title Location map
 						.panel-body
-							img.img-responsive.img-rounded(src='http://maps.googleapis.com/maps/api/staticmap?center=Brooklyn+Bridge,New+York,NY&zoom=13&size=300x300')
+							img.img-responsive.img-rounded(src='http://maps.googleapis.com/maps/api/staticmap?center=#{location.coords.lat},#{location.coords.lng}&zoom=13&size=300x300')
 
 			.row
 				.col-xs-12
 					.panel.panel-primary.review-panel
 						.panel-heading
-							a.btn.btn-default.pull-right(href='/location/review/new') Add review
+							a.btn.btn-default.pull-right(href='/location/#{location._id}/reviews/new') Add review
 							h2.panel-title Customer reviews
 						.panel-body.review-container
 							.row
-								.review
-									.well.well-sm.review-header
-										span.rating
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star
-										span.reviewAuthor	Yussi
-										small.reviewTimestamp 16 July 2013
-									p What a great place.
 
-								.review
+								each review in location.reviews
 									.well.well-sm.review-header
 										span.rating
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star
-											span.glyphicon.glyphicon-star-empty
-											span.glyphicon.glyphicon-star-empty
-											span.glyphicon.glyphicon-star-empty
-										span.reviewAuthor	Yussi2
-										small.reviewTimestamp 16 July 2013
-									p Its OK
+											+outputRating(review.rating)
+										span.reviewAuthor= review.author
+										small.reviewTimestamp
+											+formatDate(review.createdOn)
+									p= review.reviewText
+
 
 		.col-xs-12.col-md-3
 			p.lead Simon's cafe is on Loc8r beacause it has accesible wifi

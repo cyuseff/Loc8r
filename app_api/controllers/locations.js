@@ -24,7 +24,7 @@ function createLocation(loc) {
 		address: loc.obj.address,
 		rating: loc.obj.rating,
 		facilities: loc.obj.facilities,
-		_id: loc._id
+		_id: loc.obj._id
 
 	};
 	return location;
@@ -35,6 +35,8 @@ function doAddReview(request, response, location) {
 	if(!location) {
 		sendJsonResponse(response, 404, {'message':'locationid not found'});
 	} else {
+
+		console.log(request.body);
 
 		location.reviews.push({
 			author: request.body.author,
@@ -133,7 +135,7 @@ module.exports.locationsListByDistance = function(request, response){
 		num:10
 	};
 
-	if(!lng || !lat) {
+	if((!lng && lng !== 0) || (!lat && lat !== 0)) {
 		sendJsonResponse(response, 404, {'message':'lng and lat query parameters are required'});
 		return;
 	}

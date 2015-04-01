@@ -4,11 +4,12 @@ var controller = require('../controllers/locations');
 router.route('/')
 	.get(controller.list);
 
-router.route('/show')
+router.route('/:locationid')
 	.get(controller.show);
 
-router.route('/review/new')
-	.get(controller.add_review);
+router.route('/:locationid/reviews/new')
+	.get(controller.addReview)
+	.post(controller.doAddReview);
 
 module.exports = function(app){
   app.use('/location', router);
