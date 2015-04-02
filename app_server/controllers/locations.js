@@ -45,13 +45,15 @@ var renderShowPage = function(request, response, body){
 var renderReviewForm = function(request, response, body){
 	response.render('location-review-form', {
 		title: 'Review "'+ body.name + '" on Loc8r',
-		pageHeader: { title: 'Review '+ body.name }
+		pageHeader: { title: 'Review '+ body.name },
+		error: request.query.err
 	});
 }
 
 
 var showError = function(request, response, status){
 	var title, content;
+
 	if(status === 404) {
 		title = '404, page not found';
 		content = "Oh dear. Looks like we can't find this page. Sorry";
@@ -157,13 +159,19 @@ module.exports.doAddReview = function(request, response){
 		}
 	};
 
-	Req(options, function(err, res, body){
-		if(res.statusCode === 201) {
-			response.redirect('/location/'+locationid);
-		} else {
-			showError(request, response, res.statusCode);
-		}
-	});
+	if(!options.json.author || !options.json.rating || !options.json.reviewText) {
+		response.redirect('/location/'+locationid+'/reviews/new?err=val');
+	} else {
+		Req(options, function(err, res, body){
+			if(res.statusCode === 201) {
+				response.redirect('/location/'+locationid);
+			} else if(res.statusCode === 400 && body.name && body.name === 'ValidationError' ) {
+				response.redirect('/location/'+locationid+'/reviews/new?err=val');
+			} else {
+				showError(request, response, res.statusCode);
+			}
+		});
+	}
 
 
 }

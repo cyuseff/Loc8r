@@ -36,8 +36,6 @@ function doAddReview(request, response, location) {
 		sendJsonResponse(response, 404, {'message':'locationid not found'});
 	} else {
 
-		console.log(request.body);
-
 		location.reviews.push({
 			author: request.body.author,
 			rating: parseFloat(request.body.rating),
@@ -46,7 +44,7 @@ function doAddReview(request, response, location) {
 
 		location.save(function(err, location){
 			if(err) {
-				sendJsonResponse(response, 404, err);
+				sendJsonResponse(response, 400, err);
 			} else {
 				updateAverangeRating(location._id);
 				sendJsonResponse(response, 201, location.reviews[location.reviews.length - 1]);
